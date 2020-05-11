@@ -33,12 +33,14 @@ public class CSVLoaderImpl implements CSVLoader {
         String headersLine = reader.readLine();
         String[] csvHeaders = headersLine.split(",");
 
-        // check positions
-        features.forEach(feature -> {
-            if (!csvHeaders[feature.getPos()].equals(feature.getName())) {
+        // check features positions
+        for (int i = 0; i < features.size(); i++) {
+            AbstractFeature feature = features.get(i);
+            if (!csvHeaders[feature.getSourcePos()].equals(feature.getName())) {
                 throw new Error("Wrong features definition!");
             }
-        });
+            feature.setPos(i);
+        }
 
         dataset.setFeatures(features);
 
@@ -54,7 +56,7 @@ public class CSVLoaderImpl implements CSVLoader {
             Sample sample = new Sample();
             for (AbstractFeature feature : features) {
                 try {
-                    final String sampleStringValue = sampleStringValues[feature.getPos()];
+                    final String sampleStringValue = sampleStringValues[feature.getSourcePos()];
                     if (feature instanceof BooleanFeature) {
                         sample.add(this.booleanValueOf(sampleStringValue));
                     } else if (feature instanceof NumericFeature){
@@ -68,7 +70,7 @@ public class CSVLoaderImpl implements CSVLoader {
                 }
             }
             // read label value
-            String labelValue = sampleStringValues[dataset.getLabel().getPos()];
+            String labelValue = sampleStringValues[dataset.getLabel().getSourcePos()];
             if (dataset.getLabelValues().contains(labelValue)) {
                 sample.setLabelValue(labelValue);
             }
